@@ -32,7 +32,7 @@ const AddRestaurant: React.FunctionComponent<AddRestaurantProps> = () => {
             <input
               type="text"
               className="form-control"
-              placeholder="name"
+              placeholder="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -41,7 +41,7 @@ const AddRestaurant: React.FunctionComponent<AddRestaurantProps> = () => {
             <input
               type="text"
               className="form-control"
-              placeholder="location"
+              placeholder="Location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
