@@ -7,7 +7,8 @@ const RestaurantList: React.FunctionComponent = () => {
   const { restaurants, setRestaurants } = useContext(RestaurantsContext);
   const navigate = useNavigate();
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (e, id: number) => {
+    e.stopPropagation();
     try {
       const response = await RestaurantFinder.delete(`/${id}`);
       setRestaurants(restaurants.filter((restaurant) => restaurant.id !== id));
@@ -16,8 +17,13 @@ const RestaurantList: React.FunctionComponent = () => {
     }
   };
 
-  const handleUpdate = (id: number) => {
+  const handleUpdate = (e, id: number) => {
+    e.stopPropagation();
     navigate(`/restaurants/${id}/update`);
+  };
+
+  const handleRestaurantSelect = (id: number) => {
+    navigate(`/restaurants/${id}`);
   };
 
   useEffect(() => {
@@ -51,14 +57,17 @@ const RestaurantList: React.FunctionComponent = () => {
           {restaurants &&
             restaurants.map((restaurant) => {
               return (
-                <tr key={restaurant.id}>
+                <tr
+                  key={restaurant.id}
+                  onClick={() => handleRestaurantSelect(restaurant.id)}
+                >
                   <td>{restaurant.name}</td>
                   <td>{restaurant.location}</td>
                   <td>{"$".repeat(restaurant.range)}</td>
                   <td>Rating</td>
                   <td>
                     <button
-                      onClick={() => handleUpdate(restaurant.id)}
+                      onClick={(e) => handleUpdate(e, restaurant.id)}
                       className="btn btn-warning"
                     >
                       Update
@@ -66,7 +75,7 @@ const RestaurantList: React.FunctionComponent = () => {
                   </td>
                   <td>
                     <button
-                      onClick={() => handleDelete(restaurant.id)}
+                      onClick={(e) => handleDelete(e, restaurant.id)}
                       className="btn btn-danger"
                     >
                       Delete
