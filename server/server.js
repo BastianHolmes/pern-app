@@ -15,12 +15,14 @@ app.use(express.json());
 //get all restaurants
 app.get("/api/v1/restaurants", async (req, res) => {
   try {
-    const result = await dbModule.query("SELECT * FROM restaurants");
+    const restaurantRatingsData = await dbModule.query(
+      "SELECT * FROM restaurants LEFT JOIN (SELECT restaurant_id, COUNT(*), TRUNC(AVG(rating),1) AS average_rating FROM reviews GROUP BY restaurant_id) reviews ON restaurants.id = reviews.restaurant_id;"
+    );
     res.status(200).json({
       status: "success",
-      results: result.rows.length,
+      results: restaurantRatingsData.rows.length,
       data: {
-        restaurant: result.rows,
+        restaurant: restaurantRatingsData.rows,
       },
     });
   } catch (err) {
@@ -33,7 +35,7 @@ app.get("/api/v1/restaurants", async (req, res) => {
 app.get("/api/v1/restaurants/:id", async (req, res) => {
   try {
     const restaurant = await dbModule.query(
-      "SELECT * FROM restaurants WHERE  id = $1",
+      "SELECT * FROM restaurants LEFT JOIN (SELECT restaurant_id, COUNT(*), TRUNC(AVG(rating),1) AS average_rating FROM reviews GROUP BY restaurant_id) reviews ON restaurants.id = reviews.restaurant_id WHERE id=$1;",
       [req.params.id]
     );
 
@@ -66,6 +68,24 @@ app.post("/api/v1/restaurants/", async (req, res) => {
       results: result.rows.length,
       data: {
         restaurant: result.rows[0],
+      },
+    });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+app.post("/api/v1/restaurants/:id/addReview", async (req, res) => {
+  try {
+    const result = await dbModule.query(
+      "INSERT INTO reviews (restaurant_id, name, review, rating) values ($1, $2, $3, $4) returning *",
+      [req.params.id, req.body.name, req.body.review, req.body.rating]
+    );
+    res.status(200).json({
+      status: "success",
+      results: result.rows.length,
+      data: {
+        review: result.rows[0],
       },
     });
   } catch (err) {
